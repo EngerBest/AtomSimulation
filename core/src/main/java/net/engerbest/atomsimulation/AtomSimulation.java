@@ -1,22 +1,31 @@
 package net.engerbest.atomsimulation;
 
-import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.PerspectiveCamera;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.*;
+import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
-import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import net.engerbest.atomsimulation.models.BohrModel;
 import net.engerbest.atomsimulation.models.SchrodingerModel;
+
+import static com.badlogic.gdx.Gdx.*;
 
 public class AtomSimulation extends ApplicationAdapter {
     private PerspectiveCamera camera;
     private CameraInputController cameraController;
     private ModelBatch modelBatch;
+    private Stage stage;
+    private BitmapFont uiFont;
+    private Texture buttonTexture; // To clear memory later in dispose()
+    private TextButton settingsButton;
+    private Window settingsWindow;
 
     private SimulationMode currentMode;
     private AtomModel currentModel;
@@ -25,7 +34,7 @@ public class AtomSimulation extends ApplicationAdapter {
     public void create() {
         // 1. 3D camera initialization
         // The quantum world is tiny, so we set an appropriate render distance (from 0.1 to 100 units).
-        camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        camera = new PerspectiveCamera(67, graphics.getWidth(), graphics.getHeight());
         camera.position.set(0f, 0f, 10f); // Move the camera back along the Z axis
         camera.lookAt(0, 0, 0); // Look straight at the center (at the atomic nucleus)
         camera.near = 0.1f;
@@ -34,13 +43,74 @@ public class AtomSimulation extends ApplicationAdapter {
 
         // 2. Controller for rotation (left mouse button), movement (right mouse button), and zooming (scroll wheel)
         cameraController = new CameraInputController(camera);
-        Gdx.input.setInputProcessor(cameraController);
 
-        // 3. 3D Model Batch Renderer
+        // 3. Initializing UI
+        initButton();
+        initWindow();
+
+        // 4. 3D Model Batch Renderer
         modelBatch = new ModelBatch();
 
-        // 4. Setting up the initial regime (e.g., the Bohr model)
+        // 5. Setting up the initial mode (e.g., the Bohr model)
         switchMode(SimulationMode.BOHR);
+
+        // 6. Creating multiplexer for UI controls (cursor)
+        InputMultiplexer inputMultiplexer = new InputMultiplexer(stage, cameraController);
+        input.setInputProcessor(inputMultiplexer);
+    }
+
+    private void initButton() {
+        stage = new Stage(new ScreenViewport());
+
+        // 1. Create a font and a background pixel texture
+        uiFont = new BitmapFont();
+
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(Color.LIGHT_GRAY);
+        pixmap.fill();
+        buttonTexture = new Texture(pixmap);
+        pixmap.dispose(); // We delete this temporary object immediately
+
+        // 2. Configure the style
+        TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
+        buttonStyle.font = uiFont;
+        buttonStyle.fontColor = Color.WHITE;
+        buttonStyle.up = new TextureRegionDrawable(buttonTexture);
+
+        // 3. Create a button and ADD it to the scene
+        settingsButton = new TextButton("Settings", buttonStyle);
+
+        // Temporary step: set a size for the button so that it isn't 1x1 pixels in size
+        settingsButton.setSize(120, 40);
+
+        stage.addActor(settingsButton); // This is the critically important line!
+    }
+
+    private void initWindow() {
+        // 1. Create a style for the window (using the same font and texture)
+        Window.WindowStyle windowStyle = new Window.WindowStyle();
+        windowStyle.titleFont = uiFont;
+        windowStyle.titleFontColor = Color.WHITE;
+        windowStyle.background = new TextureRegionDrawable(buttonTexture); // temporary gray background
+
+        // 2. Initialize the window with a title and style
+        settingsWindow = new Window("Settings", windowStyle);
+        settingsWindow.setSize(600, 800);
+
+        // 4. Hide the window by default
+        settingsWindow.setVisible(false);
+
+        // 5. Add the window to the stage
+        stage.addActor(settingsWindow);
+
+        // 6. Create listener for registering clicks on button
+        settingsButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                // Toggle window visibility: if it's true, make it false
+                settingsWindow.setVisible(!settingsWindow.isVisible());
+            }
+        });
     }
 
     @Override
@@ -53,13 +123,13 @@ public class AtomSimulation extends ApplicationAdapter {
 
         // Updating the mathematical logic of the current model
         if (currentModel != null) {
-            currentModel.update(Gdx.graphics.getDeltaTime());
+            currentModel.update(graphics.getDeltaTime());
         }
 
         // Clear the screen (fill it with a deep space color) and clear the depth buffer for correct 3D rendering.
-        Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        Gdx.gl.glClearColor(0.05f, 0.05f, 0.1f, 1f);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+        gl.glViewport(0, 0, graphics.getWidth(), graphics.getHeight());
+        gl.glClearColor(0.05f, 0.05f, 0.1f, 1f);
+        gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
         // Starting the 3D rendering process
         modelBatch.begin(camera);
@@ -67,13 +137,16 @@ public class AtomSimulation extends ApplicationAdapter {
             currentModel.render(modelBatch, camera);
         }
         modelBatch.end();
+
+        stage.act();
+        stage.draw();
     }
 
     private void handleInput() {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) {
+        if (input.isKeyJustPressed(Input.Keys.NUM_1)) {
             switchMode(SimulationMode.BOHR);
         }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
+        if (input.isKeyJustPressed(Input.Keys.NUM_2)) {
             switchMode(SimulationMode.SCHRODINGER);
         }
     }
@@ -107,10 +180,25 @@ public class AtomSimulation extends ApplicationAdapter {
 
     @Override
     public void resize(int width, int height) {
-        // Correctly update camera proportions when the browser window is resized
+        // 1. Update the 3D camera size to match the new screen proportions
         camera.viewportWidth = width;
         camera.viewportHeight = height;
         camera.update();
+
+        // 2. Update the viewport of our UI scene (passing 'true' shifts the UI camera to its default position)
+        stage.getViewport().update(width, height, true);
+
+        // 3. Update the button's position (using the new width and height)
+        settingsButton.setPosition(
+            width - (20 + settingsButton.getWidth()),
+            height - (20 + settingsButton.getHeight())
+        );
+
+        // 4. Keep settings window centered on the screen
+        settingsWindow.setPosition(
+            (width - settingsWindow.getWidth()) / 2,
+            (height - settingsWindow.getHeight()) / 2
+        );
     }
 
     @Override
