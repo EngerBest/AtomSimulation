@@ -57,6 +57,9 @@ public class AtomSimulation extends ApplicationAdapter {
         // 6. Creating multiplexer for UI controls (cursor)
         InputMultiplexer inputMultiplexer = new InputMultiplexer(stage, cameraController);
         input.setInputProcessor(inputMultiplexer);
+
+        // Force trigger layout calculation for both 3D and UI components on startup
+        resize(graphics.getWidth(), graphics.getHeight());
     }
 
     private void initButton() {
@@ -82,6 +85,7 @@ public class AtomSimulation extends ApplicationAdapter {
 
         // Temporary step: set a size for the button so that it isn't 1x1 pixels in size
         settingsButton.setSize(120, 40);
+        settingsButton.setPosition(0, 0);
 
         stage.addActor(settingsButton); // This is the critically important line!
     }
@@ -96,6 +100,7 @@ public class AtomSimulation extends ApplicationAdapter {
         // 2. Initialize the window with a title and style
         settingsWindow = new Window("Settings", windowStyle);
         settingsWindow.setSize(600, 800);
+        settingsWindow.setPosition(0, 0);
 
         // 4. Hide the window by default
         settingsWindow.setVisible(false);
