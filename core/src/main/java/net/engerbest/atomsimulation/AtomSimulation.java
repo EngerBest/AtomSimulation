@@ -2,18 +2,14 @@ package net.engerbest.atomsimulation;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.ui.Window;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import net.engerbest.atomsimulation.models.BohrModel;
 import net.engerbest.atomsimulation.models.SchrodingerModel;
+import net.engerbest.atomsimulation.ui.SettingsButton;
+import net.engerbest.atomsimulation.ui.SettingsWindow;
 
 import static com.badlogic.gdx.Gdx.*;
 
@@ -22,10 +18,8 @@ public class AtomSimulation extends ApplicationAdapter {
     private CameraInputController cameraController;
     private ModelBatch modelBatch;
     private Stage stage;
-    private BitmapFont uiFont;
-    private Texture buttonTexture; // To clear memory later in dispose()
-    private TextButton settingsButton;
-    private Window settingsWindow;
+    private SettingsButton settingsButton;
+    private SettingsWindow settingsWindow;
 
     private SimulationMode currentMode;
     private AtomModel currentModel;
@@ -45,8 +39,11 @@ public class AtomSimulation extends ApplicationAdapter {
         cameraController = new CameraInputController(camera);
 
         // 3. Initializing UI
-        initButton();
-        initWindow();
+        // We MUST initialize the stage object first, otherwise it will be null!
+        stage = new Stage(new ScreenViewport());
+
+        settingsWindow = new SettingsWindow(stage);
+        settingsButton = new SettingsButton(stage, settingsWindow.getWindow());
 
         // 4. 3D Model Batch Renderer
         modelBatch = new ModelBatch();
@@ -60,62 +57,6 @@ public class AtomSimulation extends ApplicationAdapter {
 
         // Force trigger layout calculation for both 3D and UI components on startup
         resize(graphics.getWidth(), graphics.getHeight());
-    }
-
-    private void initButton() {
-        stage = new Stage(new ScreenViewport());
-
-        // 1. Create a font and a background pixel texture
-        uiFont = new BitmapFont();
-
-        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-        pixmap.setColor(Color.LIGHT_GRAY);
-        pixmap.fill();
-        buttonTexture = new Texture(pixmap);
-        pixmap.dispose(); // We delete this temporary object immediately
-
-        // 2. Configure the style
-        TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
-        buttonStyle.font = uiFont;
-        buttonStyle.fontColor = Color.WHITE;
-        buttonStyle.up = new TextureRegionDrawable(buttonTexture);
-
-        // 3. Create a button and ADD it to the scene
-        settingsButton = new TextButton("Settings", buttonStyle);
-
-        // Temporary step: set a size for the button so that it isn't 1x1 pixels in size
-        settingsButton.setSize(120, 40);
-        settingsButton.setPosition(0, 0);
-
-        stage.addActor(settingsButton); // This is the critically important line!
-    }
-
-    private void initWindow() {
-        // 1. Create a style for the window (using the same font and texture)
-        Window.WindowStyle windowStyle = new Window.WindowStyle();
-        windowStyle.titleFont = uiFont;
-        windowStyle.titleFontColor = Color.WHITE;
-        windowStyle.background = new TextureRegionDrawable(buttonTexture); // temporary gray background
-
-        // 2. Initialize the window with a title and style
-        settingsWindow = new Window("Settings", windowStyle);
-        settingsWindow.setSize(600, 800);
-        settingsWindow.setPosition(0, 0);
-
-        // 4. Hide the window by default
-        settingsWindow.setVisible(false);
-
-        // 5. Add the window to the stage
-        stage.addActor(settingsWindow);
-
-        // 6. Create listener for registering clicks on button
-        settingsButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                // Toggle window visibility: if it's true, make it false
-                settingsWindow.setVisible(!settingsWindow.isVisible());
-            }
-        });
     }
 
     @Override
@@ -169,7 +110,6 @@ public class AtomSimulation extends ApplicationAdapter {
         // The State pattern in action: swapping logic on the fly
         switch (currentMode) {
             case BOHR:
-                // We are passing a stub; we will create the classes in the next step.
                 currentModel = new BohrModel();
                 break;
             case SCHRODINGER:
@@ -179,12 +119,15 @@ public class AtomSimulation extends ApplicationAdapter {
 
         if (currentModel != null) {
             currentModel.activate();
-            Gdx.app.log("Simulation", "Переключено на: " + currentMode.getTitle());
+            Gdx.app.log("Simulation", "Switched to: " + currentMode.getTitle());
         }
     }
 
     @Override
     public void resize(int width, int height) {
+        // Prevent layout crashes if GWT passes zero dimensions on the very first frame
+        if (width <= 0 || height <= 0) return;
+
         // 1. Update the 3D camera size to match the new screen proportions
         camera.viewportWidth = width;
         camera.viewportHeight = height;
@@ -194,15 +137,15 @@ public class AtomSimulation extends ApplicationAdapter {
         stage.getViewport().update(width, height, true);
 
         // 3. Update the button's position (using the new width and height)
-        settingsButton.setPosition(
-            width - (20 + settingsButton.getWidth()),
-            height - (20 + settingsButton.getHeight())
+        settingsButton.getButton().setPosition(
+            width - (20 + settingsButton.getButton().getWidth()),
+            height - (20 + settingsButton.getButton().getHeight())
         );
 
         // 4. Keep settings window centered on the screen
-        settingsWindow.setPosition(
-            (width - settingsWindow.getWidth()) / 2,
-            (height - settingsWindow.getHeight()) / 2
+        settingsWindow.getWindow().setPosition(
+            (width - settingsWindow.getWindow().getWidth()) / 2,
+            (height - settingsWindow.getWindow().getHeight()) / 2
         );
     }
 
@@ -212,6 +155,17 @@ public class AtomSimulation extends ApplicationAdapter {
         modelBatch.dispose();
         if (currentModel != null) {
             currentModel.dispose();
+        }
+
+        // Cleaning UI stage and its native renderers
+        stage.dispose();
+
+        // Clean up our custom UI component resources
+        if (settingsButton != null) {
+            settingsButton.dispose();
+        }
+        if (settingsWindow != null) {
+            settingsWindow.dispose();
         }
     }
 }
