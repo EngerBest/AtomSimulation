@@ -4,6 +4,8 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import net.engerbest.atomsimulation.model.SimulationState;
 import net.engerbest.atomsimulation.model.impl.BohrAtomModel;
 import net.engerbest.atomsimulation.view.AtomPartsFactory;
@@ -18,6 +20,8 @@ import static com.badlogic.gdx.Gdx.graphics;
 public class SimulationScreen implements Screen {
     // Declare the specific instance variable for pure mathematical model
     private SimulationState simulationState;
+    private Stage stage; // Core 2D scene graph container for UI elements and layouts
+    private Table rootTable; // Root layout container that organizes UI elements into a responsive grid
 
     private BohrAtomModel bohrModel;
     private AtomPartsFactory partsFactory;
@@ -27,13 +31,27 @@ public class SimulationScreen implements Screen {
     private ModelBatch batch;
 
     private final float orbitRadius = 4f;
+    private final float rotationSpeed = 2f;
 
     @Override
     public void show() {
         // Instantiate the application state container
         simulationState = new SimulationState();
 
-        bohrModel = new BohrAtomModel(orbitRadius, 2f);
+        stage = new Stage();
+
+        // Instantiate the root table layout
+        rootTable = new Table();
+
+        // Force the table to automatically match and follow the exact dimensions of the parent Stage
+        rootTable.setFillParent(true);
+
+        // Optional: Enable visual lines around cells for easy layout positioning and debugging
+        // rootTable.debug();
+
+        stage.addActor(rootTable);
+
+        bohrModel = new BohrAtomModel(orbitRadius, rotationSpeed);
         partsFactory = new AtomPartsFactory(orbitRadius);
         atomRenderer = new BohrAtomRenderer(partsFactory, bohrModel);
 
@@ -66,10 +84,20 @@ public class SimulationScreen implements Screen {
         atomRenderer.render(batch);
 
         batch.end();
+
+        // Update UI actor logic and draw the 2D overlay on top of the 3D scene
+        stage.act(dt);
+        stage.draw();
     }
 
     @Override
-    public void resize(int width, int height) {}
+    public void resize(int width, int height) {
+        // Guardrail to prevent WebGL/Desktop runtime mathematical layout errors on 0x0 frames
+        if (width <= 0 || height <= 0) return;
+
+        // Synchronize the 2D UI viewport scales with the newly updated window boundaries
+        stage.getViewport().update(width, height, true);
+    }
 
     @Override
     public void pause() {}
@@ -85,5 +113,6 @@ public class SimulationScreen implements Screen {
         // Clean up unmanaged graphics resources to prevent memory leaks
         if (batch != null) batch.dispose();
         if (atomRenderer != null) atomRenderer.dispose();
+        if (stage != null) stage.dispose();
     }
 }
