@@ -2,9 +2,9 @@ package net.engerbest.atomsimulation.models;
 
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import net.engerbest.atomsimulation.AtomModel;
+import net.engerbest.atomsimulation.IAtomModel;
 
-public class SchrodingerModel implements AtomModel {
+public class SchrodingerModel implements IAtomModel {
     @Override
     public void activate() {}
 

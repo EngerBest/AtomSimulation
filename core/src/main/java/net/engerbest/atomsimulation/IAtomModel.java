@@ -3,7 +3,7 @@ package net.engerbest.atomsimulation;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 
-public interface AtomModel {
+public interface IAtomModel {
     // Called once when the mode is enabled
     void activate();
 

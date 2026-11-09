@@ -12,9 +12,9 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.MathUtils;
-import net.engerbest.atomsimulation.AtomModel;
+import net.engerbest.atomsimulation.IAtomModel;
 
-public class BohrModel implements AtomModel {
+public class BohrModel implements IAtomModel {
     // 1. Blueprints (Model) — loaded into memory once
     private Model nucleusModel; // Core blueprint
     private Model electronModel; // Blueprint of an electron

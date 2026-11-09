@@ -22,7 +22,7 @@ public class AtomSimulation extends ApplicationAdapter {
     private SettingsWindow settingsWindow;
 
     private SimulationMode currentMode;
-    private AtomModel currentModel;
+    private IAtomModel currentModel;
 
     @Override
     public void create() {
