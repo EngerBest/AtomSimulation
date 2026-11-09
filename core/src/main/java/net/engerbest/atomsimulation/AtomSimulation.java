@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import net.engerbest.atomsimulation.model.SimulationState;
 import net.engerbest.atomsimulation.model.impl.BohrAtomModel;
 import net.engerbest.atomsimulation.view.AtomPartsFactory;
-import net.engerbest.atomsimulation.view.AtomRenderer;
+import net.engerbest.atomsimulation.view.IAtomRenderer;
 import net.engerbest.atomsimulation.view.impl.BohrAtomRenderer;
 
 import static com.badlogic.gdx.Gdx.*;
@@ -18,7 +18,7 @@ public class AtomSimulation extends ApplicationAdapter {
 
     private BohrAtomModel bohrModel;
     private AtomPartsFactory partsFactory;
-    private AtomRenderer atomRenderer;
+    private IAtomRenderer atomRenderer;
 
     private PerspectiveCamera camera;
     private ModelBatch batch;

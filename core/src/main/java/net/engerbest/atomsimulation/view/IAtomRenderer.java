@@ -2,7 +2,7 @@ package net.engerbest.atomsimulation.view;
 
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 
-public interface AtomRenderer {
+public interface IAtomRenderer {
     /**
      * Called every frame to render 3D objects
      * @param batch This is a group of 3D models that need to be rendered.

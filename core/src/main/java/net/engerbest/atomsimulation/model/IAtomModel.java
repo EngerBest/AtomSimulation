@@ -2,7 +2,7 @@ package net.engerbest.atomsimulation.model;
 
 import com.badlogic.gdx.math.Vector3;
 
-public interface AtomModel {
+public interface IAtomModel {
     /**
      * Called once when the mode is enabled
      */

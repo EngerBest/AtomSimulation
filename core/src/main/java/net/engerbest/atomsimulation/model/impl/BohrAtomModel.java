@@ -1,11 +1,11 @@
 package net.engerbest.atomsimulation.model.impl;
 
 import com.badlogic.gdx.math.Vector3;
-import net.engerbest.atomsimulation.model.AtomModel;
+import net.engerbest.atomsimulation.model.IAtomModel;
 
 import static com.badlogic.gdx.math.MathUtils.*;
 
-public class BohrAtomModel implements AtomModel {
+public class BohrAtomModel implements IAtomModel {
     private float angle;
     private final float radius;
     private final float speed;

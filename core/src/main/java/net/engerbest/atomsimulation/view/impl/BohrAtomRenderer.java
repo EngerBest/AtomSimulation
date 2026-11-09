@@ -4,9 +4,9 @@ import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.math.Vector3;
 import net.engerbest.atomsimulation.model.impl.BohrAtomModel;
 import net.engerbest.atomsimulation.view.AtomPartsFactory;
-import net.engerbest.atomsimulation.view.AtomRenderer;
+import net.engerbest.atomsimulation.view.IAtomRenderer;
 
-public class BohrAtomRenderer implements AtomRenderer {
+public class BohrAtomRenderer implements IAtomRenderer {
     private final BohrAtomModel mathModel; // Store specific math model as a private field
 
     private final Model nucleusMesh;
