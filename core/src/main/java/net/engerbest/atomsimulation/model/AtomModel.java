@@ -16,4 +16,5 @@ public interface AtomModel {
     // Get the current calculated 3D positions of the core components
     Vector3 getNucleusPosition();
     Vector3 getElectronPosition(int index);
+    Vector3 getOrbitalPosition();
 }

@@ -23,13 +23,15 @@ public class AtomSimulation extends ApplicationAdapter {
     private PerspectiveCamera camera;
     private ModelBatch batch;
 
+    private final float orbitRadius = 4f;
+
     @Override
     public void create() {
         // Instantiate the application state container
         simulationState = new SimulationState();
 
-        bohrModel = new BohrAtomModel(4f, 2f);
-        partsFactory = new AtomPartsFactory();
+        bohrModel = new BohrAtomModel(orbitRadius, 2f);
+        partsFactory = new AtomPartsFactory(orbitRadius);
         atomRenderer = new BohrAtomRenderer(partsFactory, bohrModel);
 
         batch = new ModelBatch();

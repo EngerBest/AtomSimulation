@@ -35,8 +35,13 @@ public class BohrAtomModel implements AtomModel {
     @Override
     public Vector3 getElectronPosition(int index) {
         float x = radius * cos(angle);
-        float z = radius * sin(angle);
+        float y = radius * sin(angle);
 
-        return new Vector3(x, 0f, z);
+        return new Vector3(x, y, 0f);
+    }
+
+    @Override
+    public Vector3 getOrbitalPosition() {
+        return new Vector3(0f, 0f, 0f);
     }
 }
