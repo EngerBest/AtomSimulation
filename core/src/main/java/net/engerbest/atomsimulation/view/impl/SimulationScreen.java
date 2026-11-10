@@ -57,6 +57,7 @@ public class SimulationScreen implements Screen {
 
         batch = new ModelBatch();
 
+        // The quantum world is tiny, so we set an appropriate render distance (from 0.1 to 100 units).
         camera = new PerspectiveCamera(67, graphics.getWidth(), graphics.getHeight());
         camera.position.set(0f, 0f, 10f); // Move the camera back by 10 units along the Z-axis
         camera.lookAt(0f, 0f, 0f); // Make camera look strictly toward the center of the scene
@@ -70,7 +71,9 @@ public class SimulationScreen implements Screen {
         simulationState.advanceTime(dt);
         bohrModel.update(dt);
 
-        // Clear the screen to prevent ghosting
+        // Clear the screen (fill it with a deep space color) and clear the depth buffer for correct 3D rendering.
+        gl.glViewport(0, 0, graphics.getWidth(), graphics.getHeight());
+        gl.glClearColor(0.05f, 0.05f, 0.1f, 1f);
         gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
         // Update the camera matrix so it knows where to look
