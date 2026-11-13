@@ -1,11 +1,15 @@
 package net.engerbest.atomsimulation.view.impl;
 
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import net.engerbest.atomsimulation.model.SimulationState;
 import net.engerbest.atomsimulation.model.impl.BohrAtomModel;
 import net.engerbest.atomsimulation.view.AtomPartsFactory;
@@ -22,6 +26,10 @@ public class SimulationScreen implements Screen {
     private SimulationState simulationState;
     private Stage stage; // Core 2D scene graph container for UI elements and layouts
     private Table rootTable; // Root layout container that organizes UI elements into a responsive grid
+
+    private TextButton settingsButton;
+    private Skin defaultSkin;
+    private Texture buttonBG;
 
     private BohrAtomModel bohrModel;
     private AtomPartsFactory partsFactory;
@@ -63,6 +71,36 @@ public class SimulationScreen implements Screen {
         camera.lookAt(0f, 0f, 0f); // Make camera look strictly toward the center of the scene
         camera.near = 1f;
         camera.far = 300f;
+
+        // Settings button creation
+        // 1. Create a minimal programmatic skin for the text button
+        defaultSkin = new Skin();
+        TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
+        buttonStyle.font = new BitmapFont(); // Uses the default built-in LibGDX white font
+
+        // Create background texture for button
+        // 1. Allocate a 1x1 pixel canvas in RAM and fill it with dark gray color
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(Color.LIGHT_GRAY);
+        pixmap.fill();
+
+        // 2. Upload pixel data to VRAM as a Texture and free temporary RAM canvas
+        buttonBG = new Texture(pixmap);
+        pixmap.dispose();
+
+        // 3. Assign the stretched texture as the default background for the button's normal state
+        buttonStyle.up = new TextureRegionDrawable(new TextureRegion(buttonBG));
+
+        defaultSkin.add("default", buttonStyle);
+
+        // 2. Instantiate the button with our text and generated skin
+        settingsButton = new TextButton("Settings", defaultSkin);
+
+        // 3. Align the entire table container contents to the top-right corner of the screen
+        rootTable.top().right();
+
+        // 4. Insert the button into the grid, add 15 pixels of protective outer margins (padding)
+        rootTable.add(settingsButton).width(140f).height(45f).pad(15f);
     }
 
     @Override
@@ -117,5 +155,7 @@ public class SimulationScreen implements Screen {
         if (batch != null) batch.dispose();
         if (atomRenderer != null) atomRenderer.dispose();
         if (stage != null) stage.dispose();
+        if (defaultSkin != null) defaultSkin.dispose();
+        if (buttonBG != null) buttonBG.dispose();
     }
 }
