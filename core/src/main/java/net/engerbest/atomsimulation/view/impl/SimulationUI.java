@@ -1,17 +1,14 @@
 package net.engerbest.atomsimulation.view.impl;
 
 import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import net.engerbest.atomsimulation.controller.SimulationController;
+import net.engerbest.atomsimulation.view.impl.ui.HudControlsPanel;
+import net.engerbest.atomsimulation.view.impl.ui.SettingsWindow;
+import net.engerbest.atomsimulation.view.impl.ui.SimulationSkinFactory;
 
 import static com.badlogic.gdx.Gdx.graphics;
 
@@ -21,90 +18,34 @@ import static com.badlogic.gdx.Gdx.graphics;
  */
 public class SimulationUI implements Disposable {
     private final SimulationController controller;
-
-    private final Stage stage;
-    private final Texture background;
-    private final Skin defaultSkin;
+    private final SimulationSkinFactory skinFactory;
+    private final HudControlsPanel hudPanel;
 
     private final Table settingsMenuContainer;
 
-    private final TextButton pauseButton;
+    private final Stage stage;
 
     /**
-     * Initializes the UI stage, generates procedural button textures, and builds the layout grid.
+     * Initializes the UI stage, creates the programmatic skin, and builds the HUD layout.
      */
     public SimulationUI(SimulationController controller) {
-        // Generate a 1x1 pixel canvas in RAM to create a solid background texture
-        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-        pixmap.setColor(Color.LIGHT_GRAY);
-        pixmap.fill();
+        this.controller = controller;
 
         // Use ScreenViewport to ensure 1:1 pixel mapping between browser mouse clicks and UI actors
         stage = new Stage(new ScreenViewport());
-        this.controller = controller;
-
-        // Upload the pixel data to VRAM and immediately free the temporary RAM canvas
-        background = new Texture(pixmap);
-        pixmap.dispose();
-
-        // Configure a programmatic skin with the default bitmap font and stretched background
-        defaultSkin = new Skin();
-        TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
-        buttonStyle.font = new BitmapFont();
-        buttonStyle.up = new TextureRegionDrawable(new TextureRegion(background));
-        defaultSkin.add("default", buttonStyle);
-        defaultSkin.add("default-font", buttonStyle.font);
-
-        // Create Table and fill it for Settings Window
-        Table settingsWindow = new Table();
-        settingsWindow.setBackground(new TextureRegionDrawable(new TextureRegion(background)));
-        settingsWindow.setTouchable(Touchable.enabled);
-        // Attach an empty listener to consume mouse events and prevent camera rotation behind the open window
-        settingsWindow.addListener(new ClickListener());
+        skinFactory = new SimulationSkinFactory();
+        hudPanel = new HudControlsPanel(controller, skinFactory.getSkin());
 
         // Create container for Settings Window (for aligning)
         settingsMenuContainer = new Table();
         settingsMenuContainer.setFillParent(true);
         settingsMenuContainer.center();
-        settingsMenuContainer.add(settingsWindow).width(400f).height(300f);
+        settingsMenuContainer.add(new SettingsWindow(controller, skinFactory.getSkin())).width(400f).height(300f);
         settingsMenuContainer.setVisible(false);
 
-        // Attach the layout container to the 2D scene graph
-        stage.addActor(settingsMenuContainer);
-
-        // Create the settings trigger button
-        TextButton settingsButton = new TextButton("Settings", defaultSkin);
-        // Delegate the click event directly to the controller without processing logic in the View
-        settingsButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                controller.onSettingsClicked();
-            }
-        });
-
-        // Create the pause trigger button
-        pauseButton = new TextButton("Pause", defaultSkin);
-        pauseButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                controller.onPauseClicked();
-            }
-        });
-
-        // Build a responsive root table aligned to the top-right corner of the screen
-        Table rootTable = new Table();
-        rootTable.setFillParent(true);
-        // Optional: Enable visual lines around cells for easy layout positioning and debugging
-        // rootTable.debug();
-
-        rootTable.top().right();
-        rootTable.add(settingsButton).width(140f).height(45f).pad(15f);
-
-        rootTable.row();
-        rootTable.add(pauseButton).width(140f).height(45f).pad(15f);
-
         // Attach the root layout container to the 2D scene graph
-        stage.addActor(rootTable);
+        stage.addActor(settingsMenuContainer);
+        stage.addActor(hudPanel);
 
         // Force initial viewport synchronization to prevent hitbox offset on browser startup
         resize(graphics.getWidth(), graphics.getHeight());
@@ -118,8 +59,7 @@ public class SimulationUI implements Disposable {
         // Synchronize menu visibility with the state managed by the Controller
         settingsMenuContainer.setVisible(controller.isSettingsOpen());
 
-        // Update button label dynamically based on the current simulation pause state
-        pauseButton.setText(controller.isPaused() ? "Resume" : "Pause");
+        hudPanel.update();
 
         stage.act(dt);
         stage.draw();
@@ -140,8 +80,7 @@ public class SimulationUI implements Disposable {
     @Override
     public void dispose() {
         if (stage != null) stage.dispose();
-        if (defaultSkin != null) defaultSkin.dispose();
-        if (background != null) background.dispose();
+        if (skinFactory != null) skinFactory.dispose();
     }
 
     /**

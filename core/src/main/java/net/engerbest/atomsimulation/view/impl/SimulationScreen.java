@@ -28,16 +28,13 @@ public class SimulationScreen implements Screen {
     private PerspectiveCamera camera;
     private ModelBatch batch;
 
-    private final float orbitRadius = 4f;
-    private final float rotationSpeed = 2f;
-
     @Override
     public void show() {
-        // Instantiate the application state container
-        controller = new SimulationController(orbitRadius, rotationSpeed);
+        // Instantiate the main simulation controller
+        controller = new SimulationController();
         simulationUI = new SimulationUI(controller);
 
-        partsFactory = new AtomPartsFactory(orbitRadius);
+        partsFactory = new AtomPartsFactory(controller.getOrbitRadius());
         atomRenderer = new BohrAtomRenderer(partsFactory, controller.getBohrModel());
 
         batch = new ModelBatch();

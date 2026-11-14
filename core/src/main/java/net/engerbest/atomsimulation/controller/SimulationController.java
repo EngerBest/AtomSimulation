@@ -11,9 +11,9 @@ public class SimulationController {
     private final SimulationState simulationState;
     private final BohrAtomModel bohrModel;
 
-    public SimulationController(float orbitRadius, float rotationSpeed) {
+    public SimulationController() {
         simulationState = new SimulationState();
-        bohrModel = new BohrAtomModel(orbitRadius, rotationSpeed);
+        bohrModel = new BohrAtomModel();
     }
 
     /**
@@ -34,6 +34,14 @@ public class SimulationController {
         return bohrModel;
     }
 
+    public float getOrbitRadius() {
+        return bohrModel.getRadius();
+    }
+
+    public float getElectronSpeed() {
+        return bohrModel.getSpeed();
+    }
+
     public boolean isSettingsOpen() {
         return simulationState.isSettingsOpen();
     }
@@ -48,5 +56,9 @@ public class SimulationController {
 
     public void onPauseClicked() {
         simulationState.togglePause();
+    }
+
+    public void onSpeedChanged(float newSpeed) {
+        bohrModel.setSpeed(newSpeed);
     }
 }

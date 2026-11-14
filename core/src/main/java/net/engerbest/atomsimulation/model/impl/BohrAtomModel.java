@@ -5,10 +5,23 @@ import net.engerbest.atomsimulation.model.IAtomModel;
 
 import static com.badlogic.gdx.math.MathUtils.*;
 
+/**
+ * Mathematical model of the Bohr atom with circular electron orbit.
+ */
 public class BohrAtomModel implements IAtomModel {
+    // 'static' allows passing these constants into this() inside the default constructor
+    private static final float DEFAULT_RADIUS = 4f;
+    private static final float DEFAULT_SPEED = 2f;
+
     private float angle;
     private final float radius;
-    private final float speed;
+    // Removed 'final' so the speed can be dynamically adjusted via UI slider
+    private float speed;
+
+    // Default constructor using standard orbital parameters
+    public BohrAtomModel() {
+        this(DEFAULT_RADIUS, DEFAULT_SPEED);
+    }
 
     // Constructor to initialize custom orbital properties for this atomic system
     public BohrAtomModel(float radius, float speed) {
@@ -46,5 +59,18 @@ public class BohrAtomModel implements IAtomModel {
     @Override
     public Vector3 getOrbitalPosition() {
         return new Vector3(0f, 0f, 0f);
+    }
+
+    public float getRadius() {
+        return radius;
+    }
+
+    public float getSpeed() {
+        return speed;
+    }
+
+    public void setSpeed(float speed) {
+        // Clamp speed to non-negative values to prevent reverse rotation
+        this.speed = Math.max(0f, speed);
     }
 }
