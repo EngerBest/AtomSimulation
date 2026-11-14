@@ -1,12 +1,11 @@
 package net.engerbest.atomsimulation.view.impl;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -58,6 +57,9 @@ public class SimulationUI implements Disposable {
         // 4. Create Table and fill it for Settings Window
         Table settingsWindow = new Table();
         settingsWindow.setBackground(new TextureRegionDrawable(new TextureRegion(background)));
+        settingsWindow.setTouchable(Touchable.enabled);
+        // Attach an empty listener to consume mouse events and prevent camera rotation behind the open window
+        settingsWindow.addListener(new ClickListener());
 
         // 5. Create container for Settings Window (for aligning)
         settingsMenuContainer = new Table();
@@ -103,10 +105,6 @@ public class SimulationUI implements Disposable {
         // 10. Attach the root layout container to the 2D scene graph
         stage.addActor(rootTable);
 
-        // 11. Create input multiplexer for input processing
-        // Always reference Gdx.input directly in GWT/WebGL environments to avoid stale static references
-        Gdx.input.setInputProcessor(new InputMultiplexer(stage));
-
         // Force initial viewport synchronization to prevent hitbox offset on browser startup
         resize(graphics.getWidth(), graphics.getHeight());
     }
@@ -143,5 +141,12 @@ public class SimulationUI implements Disposable {
         if (stage != null) stage.dispose();
         if (defaultSkin != null) defaultSkin.dispose();
         if (background != null) background.dispose();
+    }
+
+    /**
+     * Exposes the 2D UI stage so the parent screen can register it in the global InputMultiplexer.
+     */
+    public Stage getStage() {
+        return this.stage;
     }
 }

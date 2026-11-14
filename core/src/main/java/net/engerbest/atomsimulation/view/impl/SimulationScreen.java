@@ -1,10 +1,12 @@
 package net.engerbest.atomsimulation.view.impl;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import net.engerbest.atomsimulation.controller.SimulationController;
-import net.engerbest.atomsimulation.model.SimulationState;
 import net.engerbest.atomsimulation.view.AtomPartsFactory;
 import net.engerbest.atomsimulation.view.IAtomRenderer;
 
@@ -12,7 +14,7 @@ import static com.badlogic.gdx.Gdx.gl;
 import static com.badlogic.gdx.Gdx.graphics;
 
 /**
- * Handles the main execution logic, asset rendering, and math updates for the atom simulation.
+ * Handles the main execution logic, asset rendering for the atom simulation.
  */
 public class SimulationScreen implements Screen {
     // Orchestrates simulation logic and mediates between Model and View
@@ -22,6 +24,7 @@ public class SimulationScreen implements Screen {
     private AtomPartsFactory partsFactory;
     private IAtomRenderer atomRenderer;
 
+    private CameraInputController cameraController;
     private PerspectiveCamera camera;
     private ModelBatch batch;
 
@@ -45,6 +48,14 @@ public class SimulationScreen implements Screen {
         camera.lookAt(0f, 0f, 0f); // Make camera look strictly toward the center of the scene
         camera.near = 1f;
         camera.far = 300f;
+
+        cameraController = new CameraInputController(camera);
+
+        // Route input events sequentially: 2D UI gets top priority to block click-through on 3D objects
+        InputMultiplexer multiplexer = new InputMultiplexer();
+        multiplexer.addProcessor(simulationUI.getStage());
+        multiplexer.addProcessor(cameraController);
+        Gdx.input.setInputProcessor(multiplexer);
     }
 
     @Override
@@ -55,6 +66,9 @@ public class SimulationScreen implements Screen {
         gl.glViewport(0, 0, graphics.getWidth(), graphics.getHeight());
         gl.glClearColor(0.05f, 0.05f, 0.1f, 1f);
         gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+
+        // Process smooth camera rotation and zoom inertia
+        cameraController.update();
 
         // Update the camera matrix so it knows where to look
         camera.update();
