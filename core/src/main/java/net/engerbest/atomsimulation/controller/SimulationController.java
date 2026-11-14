@@ -23,10 +23,30 @@ public class SimulationController {
     public void update(float dt) {
         // Safely pass the hardware delta clock into our instance variable
         simulationState.advanceTime(dt);
-        bohrModel.update(dt);
+
+        // Only update electron physics if the simulation is not paused
+        if (!simulationState.isPaused()) {
+            bohrModel.update(dt);
+        }
     }
 
     public BohrAtomModel getBohrModel() {
         return bohrModel;
+    }
+
+    public boolean isSettingsOpen() {
+        return simulationState.isSettingsOpen();
+    }
+
+    public boolean isPaused() {
+        return simulationState.isPaused();
+    }
+
+    public void onSettingsClicked() {
+        simulationState.toggleSettings();
+    }
+
+    public void onPauseClicked() {
+        simulationState.togglePause();
     }
 }

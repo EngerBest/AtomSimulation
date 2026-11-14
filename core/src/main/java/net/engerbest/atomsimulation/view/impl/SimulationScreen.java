@@ -4,6 +4,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import net.engerbest.atomsimulation.controller.SimulationController;
+import net.engerbest.atomsimulation.model.SimulationState;
 import net.engerbest.atomsimulation.view.AtomPartsFactory;
 import net.engerbest.atomsimulation.view.IAtomRenderer;
 
@@ -15,7 +16,7 @@ import static com.badlogic.gdx.Gdx.graphics;
  */
 public class SimulationScreen implements Screen {
     // Orchestrates simulation logic and mediates between Model and View
-    private SimulationController simulationController;
+    private SimulationController controller;
     private SimulationUI simulationUI;
 
     private AtomPartsFactory partsFactory;
@@ -30,11 +31,11 @@ public class SimulationScreen implements Screen {
     @Override
     public void show() {
         // Instantiate the application state container
-        simulationController = new SimulationController(orbitRadius, rotationSpeed);
-        simulationUI = new SimulationUI();
+        controller = new SimulationController(orbitRadius, rotationSpeed);
+        simulationUI = new SimulationUI(controller);
 
         partsFactory = new AtomPartsFactory(orbitRadius);
-        atomRenderer = new BohrAtomRenderer(partsFactory, simulationController.getBohrModel());
+        atomRenderer = new BohrAtomRenderer(partsFactory, controller.getBohrModel());
 
         batch = new ModelBatch();
 
@@ -48,7 +49,7 @@ public class SimulationScreen implements Screen {
 
     @Override
     public void render(float dt) {
-        simulationController.update(dt);
+        controller.update(dt);
 
         // Clear the screen (fill it with a deep space color) and clear the depth buffer for correct 3D rendering.
         gl.glViewport(0, 0, graphics.getWidth(), graphics.getHeight());
