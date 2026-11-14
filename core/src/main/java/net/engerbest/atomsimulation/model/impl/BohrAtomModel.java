@@ -18,7 +18,9 @@ public class BohrAtomModel implements IAtomModel {
     }
 
     @Override
-    public void activate() {}
+    public void activate() {
+        // Reserved for future initialization logic when switching simulation modes
+    }
 
     @Override
     public void update(float dt) {
@@ -33,6 +35,7 @@ public class BohrAtomModel implements IAtomModel {
     }
 
     @Override
+    // {int index} Reserved for future possibilities of multielectron models
     public Vector3 getElectronPosition(int index) {
         float x = radius * cos(angle);
         float y = radius * sin(angle);

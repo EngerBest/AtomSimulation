@@ -2,6 +2,9 @@ package net.engerbest.atomsimulation.view;
 
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 
+/**
+ * Defines the pure visual contract for atom renderers
+ */
 public interface IAtomRenderer {
     /**
      * Called every frame to render 3D objects

@@ -2,6 +2,9 @@ package net.engerbest.atomsimulation.model;
 
 import com.badlogic.gdx.math.Vector3;
 
+/**
+ * Defines the pure mathematical contract for atomic simulation models.
+ */
 public interface IAtomModel {
     /**
      * Called once when the mode is enabled

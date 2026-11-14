@@ -1,5 +1,8 @@
 package net.engerbest.atomsimulation.model;
 
+/**
+ * Stores pure application states, flags, and the simulation clock.
+ */
 public class SimulationState {
     private float animationTime = 0f;
     private boolean isPaused = false;

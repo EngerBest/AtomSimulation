@@ -21,7 +21,7 @@ public class SimulationController {
      * @param dt Delta time in seconds since the last frame.
      */
     public void update(float dt) {
-        // Safely pass the hardware delta clock into our instance variable
+        // Advance the master simulation timer
         simulationState.advanceTime(dt);
 
         // Only update electron physics if the simulation is not paused
