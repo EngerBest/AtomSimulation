@@ -1,5 +1,7 @@
 package net.engerbest.atomsimulation.model.math;
 
+import static java.lang.Math.*;
+
 public class Complex {
     // Fields (technically current complex number)
     private double re;
@@ -41,6 +43,12 @@ public class Complex {
         re = newRe;
     }
 
+    // Convenient way to overwrite current complex number by new in polar coordinatesПроверь
+    public void setPolar(double radius, double angle) {
+        re = radius * cos(angle);
+        im = radius * sin(angle);
+    }
+
     // Immutable methods
     // Returns new Complex object that equals current added to given
     public Complex add(Complex other) {
@@ -66,10 +74,22 @@ public class Complex {
 
     // Returns magnitude of current complex number
     public double magnitude() {
-        return Math.sqrt(magnitudeSquared());
+        return sqrt(magnitudeSquared());
     }
 
-    // Getter and Setter
+    // Convenient way to create new complex numbers from polar coordinates
+    public static Complex fromPolar(double radius, double angle) {
+        Complex result = new Complex();
+        result.setPolar(radius, angle);
+        return result;
+    }
+
+    // Returns current angle of complex number
+    public double argument() {
+        return atan2(im, re);
+    }
+
+    // Getters
     public double getRe() {
         return re;
     }
